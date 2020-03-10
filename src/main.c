@@ -54,9 +54,9 @@ void print_board(char **board,int size){
 		for (int j = 0; j < size; j++)
 		{
 			my_putstr("| ");
-			
-
 			my_putchar(board[i][j]);
+			
+			
 			
 			my_putstr(" ");
 		}
@@ -233,11 +233,10 @@ char **get_neighbors_positions(char **board, unsigned int size, unsigned int x_p
 	}
 	return neighbors;
 }
-int get_number(unsigned int *num) {
-	my_putstr("Write two letters to reveal that square\n");
+int get_number(unsigned int *num,unsigned int size) {
 	char num_str[3];
-	fgets(num_str,sizeof(num_str),stdin);
-	
+	scanf ("%[^\n]%*c", num_str);
+	size--;
 	char letter= num_str[0];
 	if(letter=='q'){
 		return 1;
@@ -245,20 +244,20 @@ int get_number(unsigned int *num) {
 	if(letter=='s'){
 		return 2;
 	}
-	if(letter >= 'a'  && letter <= 'z'){
+	if(letter >= 'a'  && letter <= 'a'+ size){
 		num[0]= num_str[0] -'a';
 	} 
-	else if(letter >= 'A' && letter <= 'Z') {
+	else if(letter >= 'A' && letter <= 'A'+ size) {
 		num[0]= num_str[0] -'A';
 	}
 	else{
 		return -1;
 	}
 	letter= num_str[1];
-	if(letter >= 'a'  && letter <= 'z'){
+	if(letter >= 'a'  && letter <= 'a'+ size){
 		num[1]= num_str[1] -'a';
 	} 
-	else if(letter >= 'A' && letter <= 'Z') {
+	else if(letter >= 'A' && letter <= 'A' + size) {
 		num[1]= num_str[1] -'A';
 	}
 	else{
@@ -267,27 +266,49 @@ int get_number(unsigned int *num) {
 	return 0;
 
 }
-int game_ended(char **board,unsigned int size){
+int game_ended(char **board, char **show_board,unsigned int size){
+	int not_ended = 0;
+	int lost = 0;
 	for(int i =0; i < size; i++) {
 		for(int j = 0; j < size; j++) {
-			if(board[i][j]== '?'){
-				return -1;
+			if(board[i][j]=='0'){
+				if(show_board[i][j]!= '?'){
+					lost = 1;
+				}
+			}
+			if(show_board[i][j]== '?'){
+				if(board[i][j]!='0'){
+					not_ended=1 ;
+				}
 			}
 		}
 	}
-	return 0;
+	if(lost == 1){
+		return -1;
+	}
+	if(not_ended ==1 ) {
+		return 0;
+	}
+	return 1;
 }
 int play_round(char** board, char **show_board, unsigned int size){
 	unsigned int num[2];
-	int number= get_number(num);
+	my_putstr("Write two letters to reveal that square\n");
+	int number= get_number(num,size);
 	while(number == -1) {
-		number= get_number(num);
+		my_putstr("Write two letters to reveal that square\n");
+
+		number= get_number(num,size);
+		if(number != -1){
+			break;
+		}
 	}
 	if(number==1){
 		return 1;
 	}
 	if(number==2){
 		print_board(board,size);
+		print_board(show_board,size);
 		return 0;
 	}
 	my_putchar(num[0]+'0');
@@ -295,10 +316,9 @@ int play_round(char** board, char **show_board, unsigned int size){
 	my_putchar('\n');
 	show_neighbors(board, show_board,size,num[0],num[1]);
 	print_board(show_board,size);
-	if(game_ended(show_board,size) == 0){
-		return 1;
-	}
-	return 0;
+	print_board(board,size);
+	int ended= game_ended(board,show_board,size);
+	return ended;
 
 }
 
@@ -308,6 +328,12 @@ int main(int argc, char const *argv[])
 	srand(time(NULL)); 
 	unsigned int size= 10;
 	unsigned int mines = 10;
+	if(argc > 1) {
+		size=atoi(argv[1]);
+	}
+	if(argc > 2) {
+		mines=atoi(argv[2]);
+	}
 	char **board= init_board(size);
 	char **board2= init_board(size);
 	set_mines(board,mines,size);
@@ -317,6 +343,12 @@ int main(int argc, char const *argv[])
 	int result= play_round(board,board2,size);
 	while(result==0){
 		result = play_round(board,board2,size) ;
+	}
+	if(result==1){
+		my_putstr("Congratulations! You win!\n");
+	}
+	if(result==-1){
+		my_putstr("Game over!\n");
 	}
 	return 0;
 }
