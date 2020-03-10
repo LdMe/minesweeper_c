@@ -232,8 +232,12 @@ char **get_neighbors_positions(char **board, unsigned int size, unsigned int x_p
 	return neighbors;
 }
 int get_number(unsigned int *num,unsigned int size) {
-	char num_str[3];
-	scanf ("%[^\n]%*c", num_str);
+	my_putstr("Write two letters to reveal that square\n");
+	my_putstr("Write a '+' sign after two letters to put/remove a flag\n");
+	char num_str[4];
+	num_str[2] =' ';
+	num_str[3]='\0';
+	scanf ("%s", num_str);
 	size--;
 	char letter= num_str[0];
 	if(letter=='q'){
@@ -261,6 +265,9 @@ int get_number(unsigned int *num,unsigned int size) {
 	else{
 		return -1;
 	}
+	if(num_str[2]=='+'){
+		return 3;
+	}
 	return 0;
 
 }
@@ -270,7 +277,7 @@ int game_ended(char **board, char **show_board,unsigned int size){
 	for(int i =0; i < size; i++) {
 		for(int j = 0; j < size; j++) {
 			if(board[i][j]=='0'){
-				if(show_board[i][j]!= '?'){
+				if(show_board[i][j]!= '?' && show_board[i][j]!= '+'){
 					lost = 1;
 				}
 			}
@@ -289,12 +296,25 @@ int game_ended(char **board, char **show_board,unsigned int size){
 	}
 	return 1;
 }
-int play_round(char** board, char **show_board, unsigned int size){
+int put_flag(char **board,unsigned int x_pos, unsigned int y_pos, unsigned int *mines) {
+	if( board[y_pos][x_pos] == '?') {
+		if(*mines > 0) {
+			board[y_pos][x_pos] = '+';
+			(*mines)--;
+		}
+	}
+	else if( board[y_pos][x_pos] == '+') {
+		board[y_pos][x_pos] = '?';
+		(*mines)++;
+	}
+	return *mines;
+
+}
+int play_round(char** board, char **show_board, unsigned int size,unsigned int *mines){
 	unsigned int num[2];
-	my_putstr("Write two letters to reveal that square\n");
+	
 	int number= get_number(num,size);
 	while(number == -1) {
-		my_putstr("Write two letters to reveal that square\n");
 
 		number= get_number(num,size);
 		if(number != -1){
@@ -309,10 +329,13 @@ int play_round(char** board, char **show_board, unsigned int size){
 		print_board(show_board,size);
 		return 0;
 	}
-	my_putchar(num[0]+'0');
-	my_putchar(num[1]+'0');
-	my_putchar('\n');
-	show_neighbors(board, show_board,size,num[0],num[1]);
+	if(number == 3) {
+		*mines =put_flag(show_board,num[0],num[1],mines);
+	}
+	else {
+
+		show_neighbors(board, show_board,size,num[0],num[1]);
+	}
 	print_board(show_board,size);
 	int ended= game_ended(board,show_board,size);
 	return ended;
@@ -337,14 +360,15 @@ int main(int argc, char const *argv[])
 	
 	initialize(board,size);
 	print_board(board2,size);
-	int result= play_round(board,board2,size);
+	int result= play_round(board,board2,size,&mines);
 	while(result==0){
-		result = play_round(board,board2,size) ;
+		result = play_round(board,board2,size,&mines) ;
 	}
 	if(result==1){
 		my_putstr("Congratulations! You win!\n");
 	}
 	if(result==-1){
+		print_board(board,size);
 		my_putstr("Game over!\n");
 	}
 	return 0;
