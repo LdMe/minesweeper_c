@@ -242,6 +242,9 @@ int get_number(unsigned int *num) {
 	if(letter=='q'){
 		return 1;
 	}
+	if(letter=='s'){
+		return 2;
+	}
 	if(letter >= 'a'  && letter <= 'z'){
 		num[0]= num_str[0] -'a';
 	} 
@@ -282,6 +285,10 @@ int play_round(char** board, char **show_board, unsigned int size){
 	}
 	if(number==1){
 		return 1;
+	}
+	if(number==2){
+		print_board(board,size);
+		return 0;
 	}
 	my_putchar(num[0]+'0');
 	my_putchar(num[1]+'0');
