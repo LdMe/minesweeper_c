@@ -316,7 +316,6 @@ int play_round(char** board, char **show_board, unsigned int size){
 	my_putchar('\n');
 	show_neighbors(board, show_board,size,num[0],num[1]);
 	print_board(show_board,size);
-	print_board(board,size);
 	int ended= game_ended(board,show_board,size);
 	return ended;
 
