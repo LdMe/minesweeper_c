@@ -302,7 +302,7 @@ int play_round(char** board, char **show_board, unsigned int size){
 		}
 	}
 	if(number==1){
-		return 1;
+		return 2;
 	}
 	if(number==2){
 		print_board(board,size);
