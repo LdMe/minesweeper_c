@@ -54,12 +54,15 @@ void print_board(char **board,int size){
 		for (int j = 0; j < size; j++)
 		{
 			my_putstr("| ");
+			
+
 			my_putchar(board[i][j]);
+			
 			my_putstr(" ");
 		}
 		my_putchar('|');
 		my_putchar(' ');
-		my_putchar('0'+i);
+		my_putchar('A'+i);
 		my_putstr(" |");
 		my_putchar('\n');
 	}
@@ -125,10 +128,6 @@ void show_neighbors(char **board,char **show_board, unsigned int size, unsigned 
 			continue;
 		}
 		if(*neighbors[i]==' ' ) {
-			
-			printf("positions y:%d\n",positions[i][0] );
-			printf("positions x:%d\n",positions[i][1] );
-
 			show_neighbors(board,show_board,size,positions[i][1],positions[i][0]);
 
 		}
@@ -234,6 +233,68 @@ char **get_neighbors_positions(char **board, unsigned int size, unsigned int x_p
 	}
 	return neighbors;
 }
+int get_number(unsigned int *num) {
+	my_putstr("Write two letters to reveal that square\n");
+	char num_str[3];
+	fgets(num_str,sizeof(num_str),stdin);
+	
+	char letter= num_str[0];
+	if(letter=='q'){
+		return 1;
+	}
+	if(letter >= 'a'  && letter <= 'z'){
+		num[0]= num_str[0] -'a';
+	} 
+	else if(letter >= 'A' && letter <= 'Z') {
+		num[0]= num_str[0] -'A';
+	}
+	else{
+		return -1;
+	}
+	letter= num_str[1];
+	if(letter >= 'a'  && letter <= 'z'){
+		num[1]= num_str[1] -'a';
+	} 
+	else if(letter >= 'A' && letter <= 'Z') {
+		num[1]= num_str[1] -'A';
+	}
+	else{
+		return -1;
+	}
+	return 0;
+
+}
+int game_ended(char **board,unsigned int size){
+	for(int i =0; i < size; i++) {
+		for(int j = 0; j < size; j++) {
+			if(board[i][j]== '?'){
+				return -1;
+			}
+		}
+	}
+	return 0;
+}
+int play_round(char** board, char **show_board, unsigned int size){
+	unsigned int num[2];
+	int number= get_number(num);
+	while(number == -1) {
+		number= get_number(num);
+	}
+	if(number==1){
+		return 1;
+	}
+	my_putchar(num[0]+'0');
+	my_putchar(num[1]+'0');
+	my_putchar('\n');
+	show_neighbors(board, show_board,size,num[0],num[1]);
+	print_board(show_board,size);
+	if(game_ended(show_board,size) == 0){
+		return 1;
+	}
+	return 0;
+
+}
+
 int main(int argc, char const *argv[])
 {
 	//clear();
@@ -243,11 +304,12 @@ int main(int argc, char const *argv[])
 	char **board= init_board(size);
 	char **board2= init_board(size);
 	set_mines(board,mines,size);
-
+	
 	initialize(board,size);
 	print_board(board2,size);
-	show_neighbors(board,board2,size,0,0);
-	print_board(board2,size);
-	print_board(board,size);
+	int result= play_round(board,board2,size);
+	while(result==0){
+		result = play_round(board,board2,size) ;
+	}
 	return 0;
 }
