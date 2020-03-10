@@ -127,10 +127,8 @@ void show_neighbors(char **board,char **show_board, unsigned int size, unsigned 
 		if(positions[i][0] == -1 || positions[i][1] == -1){
 			continue;
 		}
-		if(*neighbors[i]==' ' ) {
-			show_neighbors(board,show_board,size,positions[i][1],positions[i][0]);
+		show_neighbors(board,show_board,size,positions[i][1],positions[i][0]);
 
-		}
 		
 	}
 	free(neighbors);
